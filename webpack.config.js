@@ -1,6 +1,12 @@
 const path = require('path')
 const HTMLWebPackPlugin = require('html-webpack-plugin')
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+const isDev = process.env.NODE_ENV === 'development'
+const isProd = !isDev
+console.log('isDev', isDev)
 
 module.exports = {
     context: path.resolve(__dirname, 'src'),
@@ -13,21 +19,66 @@ module.exports = {
         filename: '[name].[contenthash].js',
         path: path.resolve(__dirname, 'dist')
     },
+    resolve: {
+        extensions: ['.js', '.json', '.png'],
+        alias: {
+            '@models': path.resolve(__dirname, 'src/models'),
+            '@': path.resolve(__dirname, 'src')
+        }
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all'
+        }
+    },
+    devServer: {
+        port: 4200,
+        hot: isDev
+    },
     plugins: [
         new HTMLWebPackPlugin({
             template: "./index.html",
+            minify: {
+                collapseWhitespace: isProd
+            }
         }),
-        new CleanWebpackPlugin()
+        new CleanWebpackPlugin(),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src/favicon.ico'),
+                    to: path.resolve(__dirname, 'dist'),
+                }
+            ]
+        }),
+        new MiniCssExtractPlugin({
+            filename: '[name].[contenthash].css',
+        })
     ],
     module: {
         rules: [
             {
                 test: /\.css$/,
-                use: ['style-loader','css-loader']
+                use: [{
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {},
+                },'css-loader']
             },
             {
                 test: /\.(png|jpg|svg|gif)$/,
                 use: ['file-loader']
+            },
+            {
+                test: '/\.(ttf|woff|woff2|eot)$',
+                use: ['file-loader']
+            },
+            {
+                test: /\.xml$/,
+                use: ['xml-loader']
+            },
+            {
+                test: /\.csv$/,
+                use: ['csv-loader']
             }
         ]
     }

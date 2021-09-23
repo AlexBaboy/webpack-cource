@@ -9,6 +9,7 @@
     "watch": "cross-env NODE_ENV=development webpack --mode development --watch",
     "start": "cross-env NODE_ENV=development webpack-dev-server --mode development --open"
   },
+  "browserslist": "> 0.25%, not dead",
   "keywords": [
     "js",
     "webpack"
@@ -16,6 +17,13 @@
   "author": "Alex",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.8.3",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-react": "^7.8.3",
+    "@babel/preset-typescript": "^7.8.3",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.2.2",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^9.0.1",
     "cross-env": "^7.0.3",
@@ -36,8 +44,11 @@
     "xml-loader": "^1.2.1"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.8.3",
     "jquery": "^3.6.0",
     "normalize.css": "^8.0.1",
-    "optimize-css-assets-webpack-plugin": "^6.0.1"
+    "optimize-css-assets-webpack-plugin": "^6.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   }
 }

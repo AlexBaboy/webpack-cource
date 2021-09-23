@@ -39,12 +39,24 @@ const cssLoaders = extra => {
     return loaders
 }
 
+const babelOptions = preset => {
+    const opts = {
+            presets: [
+                '@babel/preset-env',
+            ]
+    }
+    if(preset) {
+        opts.presets.push(preset)
+    }
+    return opts
+}
+
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: {
-        main: './index.js',
-        analytics: './analytics.js'
+        main: ['@babel/polyfill','./index.jsx'],
+        analytics: './analytics.ts'
     },
     output: {
         filename: filename('js'),
@@ -111,6 +123,30 @@ module.exports = {
             {
                 test: /\.csv$/,
                 use: ['csv-loader']
+            },
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: babelOptions()
+                }
+            },
+            {
+                test: /\.m?ts$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: babelOptions('@babel/preset-typescript')
+                }
+            },
+            {
+                test: /\.m?jsx$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: babelOptions('@babel/preset-react')
+                }
             }
         ]
     }

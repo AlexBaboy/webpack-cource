@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
 const TerserWebpackPlugin = require('terser-webpack-plugin')
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 
 const isDev = process.env.NODE_ENV === 'development'
 const isProd = !isDev
@@ -51,6 +52,48 @@ const babelOptions = preset => {
     return opts
 }
 
+const jsLoaders = () => {
+
+    const loaders = [{
+        loader: 'babel-loader',
+        options: babelOptions()
+    }]
+
+    if(isDev) {
+        loaders.push('eslint-loader')
+    }
+
+    return loaders
+}
+
+const plugins = () => {
+    const base = [
+        new HTMLWebPackPlugin({
+            template: "./index.html",
+            minify: {
+                collapseWhitespace: isProd
+            }
+        }),
+        new CleanWebpackPlugin(),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src/favicon.ico'),
+                    to: path.resolve(__dirname, 'dist'),
+                }
+            ]
+        }),
+        new MiniCssExtractPlugin({
+            filename: filename('css'),
+        })
+    ]
+
+    if(isProd) {
+        base.push(new BundleAnalyzerPlugin ())
+    }
+    return base
+}
+
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
@@ -74,26 +117,8 @@ module.exports = {
         port: 4200,
         hot: isDev
     },
-    plugins: [
-        new HTMLWebPackPlugin({
-            template: "./index.html",
-            minify: {
-                collapseWhitespace: isProd
-            }
-        }),
-        new CleanWebpackPlugin(),
-        new CopyWebpackPlugin({
-            patterns: [
-                {
-                    from: path.resolve(__dirname, 'src/favicon.ico'),
-                    to: path.resolve(__dirname, 'dist'),
-                }
-            ]
-        }),
-        new MiniCssExtractPlugin({
-            filename: filename('css'),
-        })
-    ],
+    devtool: isDev ? 'source-map' : false,
+    plugins: plugins(),
     module: {
         rules: [
             {
@@ -113,7 +138,7 @@ module.exports = {
                 use: ['file-loader']
             },
             {
-                test: '/\.(ttf|woff|woff2|eot)$',
+                test: /\.(ttf|woff|woff2|eot)$/,
                 use: ['file-loader']
             },
             {
@@ -127,10 +152,7 @@ module.exports = {
             {
                 test: /\.m?js$/,
                 exclude: /node_modules/,
-                use: {
-                    loader: 'babel-loader',
-                    options: babelOptions()
-                }
+                use: jsLoaders()
             },
             {
                 test: /\.m?ts$/,
